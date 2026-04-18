@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AnimaStudio Pro — Anime Scene Maker</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/main.css">
+<link rel="stylesheet" href="css/sidebar.css">
+<link rel="stylesheet" href="css/timeline.css">
+<link rel="stylesheet" href="css/modals.css">
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div id="topbar">
+  <div class="logo">AnimaStudio<span> PRO</span></div>
+  <div class="topbar-sep"></div>
+  <input type="text" id="project-name" value="My Anime Scene" spellcheck="false">
+  <div class="topbar-sep"></div>
+  <button class="topbar-btn" onclick="showTemplates()">📋 Templates</button>
+  <button class="topbar-btn" onclick="undo()" title="Ctrl+Z">↩ Undo</button>
+  <button class="topbar-btn" onclick="redo()" title="Ctrl+Y">↪ Redo</button>
+  <div class="topbar-sep"></div>
+  <button class="topbar-btn" onclick="importProject()">📂 Open</button>
+  <button class="topbar-btn" onclick="saveProject()">💾 Save</button>
+  <button class="topbar-btn success" onclick="openExport()">⬇ Export</button>
+  <div class="ml-auto"></div>
+  <span class="fps-indicator" id="fps-indicator">24 FPS · 0s</span>
+</div>
+
+<!-- MAIN LAYOUT -->
+<div id="main">
+
+  <!-- LEFT SIDEBAR -->
+  <div id="sidebar-left">
+    <div class="sidebar-tabs">
+      <div class="stab active" data-tab="chars" onclick="switchTab('chars',this)">CHARS</div>
+      <div class="stab" data-tab="expr" onclick="switchTab('expr',this)">EXPR</div>
+      <div class="stab" data-tab="bg" onclick="switchTab('bg',this)">SCENE</div>
+      <div class="stab" data-tab="fx" onclick="switchTab('fx',this)">FX</div>
+      <div class="stab" data-tab="anim" onclick="switchTab('anim',this)">ANIM</div>
+    </div>
+    <div class="sidebar-body">
+
+      <!-- CHARACTERS TAB -->
+      <div class="sidebar-section active" id="tab-chars">
+        <div class="s-label">Characters on Stage</div>
+        <div id="stage-char-list"></div>
+        <button class="add-char-btn" onclick="addCharToScene()">＋ Add Character</button>
+        <div class="s-label">Select Active</div>
+        <div class="char-grid" id="char-grid"></div>
+        <div class="s-label" style="margin-top:4px">Skin Tone</div>
+        <div class="color-row" id="skin-row"></div>
+        <div class="s-label">Shirt Color</div>
+        <div class="color-row" id="shirt-row"></div>
+        <div class="s-label">Hair Color</div>
+        <div class="color-row" id="hair-row"></div>
+      </div>
+
+      <!-- EXPRESSIONS TAB -->
+      <div class="sidebar-section" id="tab-expr">
+        <div class="s-label">Facial Expression</div>
+        <div class="expr-grid" id="expr-grid"></div>
+        <div class="s-label" style="margin-top:6px">Pose</div>
+        <div class="expr-grid" id="pose-grid"></div>
+        <div class="s-label" style="margin-top:6px">Lip Sync Mode</div>
+        <div class="row-btns">
+          <button class="mini-btn" id="lipsync-off" onclick="setLipsync('off',this)">Off</button>
+          <button class="mini-btn active-mini" id="lipsync-auto" onclick="setLipsync('auto',this)">Auto</button>
+          <button class="mini-btn" id="lipsync-manual" onclick="setLipsync('manual',this)">Manual</button>
+        </div>
+        <div id="manual-mouth-row" style="display:none;margin-top:6px">
+          <div class="s-label">Mouth Shape</div>
+          <div class="expr-grid" id="mouth-grid"></div>
+        </div>
+      </div>
+
+      <!-- BACKGROUNDS TAB -->
+      <div class="sidebar-section" id="tab-bg">
+        <div class="s-label">Scene Background</div>
+        <div class="bg-grid" id="bg-grid"></div>
+        <div class="s-label" style="margin-top:6px">Props & Scene FX</div>
+        <div class="fx-grid" id="scene-fx-grid"></div>
+      </div>
+
+      <!-- EFFECTS TAB -->
+      <div class="sidebar-section" id="tab-fx">
+        <div class="s-label">Visual Effects</div>
+        <div class="fx-grid" id="fx-grid"></div>
+        <div class="s-label" style="margin-top:6px">Sound Tags</div>
+        <div class="fx-grid" id="sound-grid"></div>
+      </div>
+
+      <!-- ANIMATION TAB -->
+      <div class="sidebar-section" id="tab-anim">
+        <div class="s-label">Character Motion</div>
+        <div class="prop-row">
+          <label>X</label>
+          <input type="range" id="px" min="5" max="95" value="45" oninput="updateProp('charX',+this.value);document.getElementById('px-val').textContent=this.value">
+          <span class="val" id="px-val">45</span>
+        </div>
+        <div class="prop-row">
+          <label>Y</label>
+          <input type="range" id="py" min="20" max="90" value="58" oninput="updateProp('charY',+this.value);document.getElementById('py-val').textContent=this.value">
+          <span class="val" id="py-val">58</span>
+        </div>
+        <div class="prop-row">
+          <label>Scale</label>
+          <input type="range" id="pscale" min="30" max="200" value="100" oninput="updateProp('charScale',this.value/100);document.getElementById('pscale-val').textContent=(this.value/100).toFixed(1)">
+          <span class="val" id="pscale-val">1.0</span>
+        </div>
+        <div class="prop-row">
+          <label>Rot</label>
+          <input type="range" id="prot" min="-30" max="30" value="0" oninput="updateProp('rotation',+this.value);document.getElementById('prot-val').textContent=this.value+'°'">
+          <span class="val" id="prot-val">0°</span>
+        </div>
+        <div class="row-btns">
+          <button class="mini-btn" onclick="updateProp('flip',!S.chars[S.activeChar]?.flip);redraw()">↔ Flip</button>
+          <button class="mini-btn" onclick="resetTransform()">↺ Reset</button>
+        </div>
+        <div class="s-label" style="margin-top:8px">Walk Animation</div>
+        <div class="row-btns">
+          <button class="mini-btn" id="walk-off" onclick="setWalk('none',this)">Off</button>
+          <button class="mini-btn" id="walk-left" onclick="setWalk('left',this)">← Walk</button>
+          <button class="mini-btn" id="walk-right" onclick="setWalk('right',this)">Walk →</button>
+        </div>
+        <div class="prop-row" style="margin-top:4px">
+          <label>Speed</label>
+          <input type="range" id="walk-speed" min="1" max="10" value="4" oninput="document.getElementById('wsp-val').textContent=this.value">
+          <span class="val" id="wsp-val">4</span>
+        </div>
+        <div class="s-label" style="margin-top:8px">Frame Hold</div>
+        <div class="prop-row">
+          <label>Hold</label>
+          <input type="range" id="phold" min="1" max="24" value="4" oninput="updateProp('holdFrames',+this.value);document.getElementById('phold-val').textContent=this.value+'f'">
+          <span class="val" id="phold-val">4f</span>
+        </div>
+        <div class="s-label" style="margin-top:4px">Hotkeys</div>
+        <div class="hotkeys">
+          <span class="hk">Space</span><span class="hk-label">Play/Pause</span>
+          <span class="hk">A</span><span class="hk-label">Add Frame</span>
+          <span class="hk">←→</span><span class="hk-label">Navigate</span>
+          <span class="hk">Del</span><span class="hk-label">Remove Frame</span>
+          <span class="hk">Ctrl+Z</span><span class="hk-label">Undo</span>
+          <span class="hk">D</span><span class="hk-label">Dupe Frame</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- CENTER CANVAS AREA -->
+  <div id="center">
+    <div id="canvas-toolbar">
+      <button class="ctool-btn active" id="tool-select" onclick="setTool('select',this)">▸ Select</button>
+      <button class="ctool-btn" id="tool-move" onclick="setTool('move',this)">✋ Move</button>
+      <button class="ctool-btn" id="tool-text" onclick="setTool('text',this)">T Text</button>
+      <div class="ctool-sep"></div>
+      <button class="ctool-btn" onclick="zoomIn()">＋</button>
+      <span class="zoom-label" id="zoom-label">100%</span>
+      <button class="ctool-btn" onclick="zoomOut()">－</button>
+      <button class="ctool-btn" onclick="resetZoom()">⊡ Fit</button>
+      <div class="ctool-sep"></div>
+      <button class="ctool-btn" id="onion-btn" onclick="toggleOnionSkin(this)">🧅 Onion</button>
+      <button class="ctool-btn" id="grid-btn" onclick="toggleGrid(this)">⊞ Grid</button>
+      <button class="ctool-btn" id="safe-btn" onclick="toggleSafeZone(this)">📐 Safe</button>
+      <div class="ctool-sep"></div>
+      <button class="ctool-btn" onclick="duplicateFrame()" style="color:var(--cyan)">⧉ Dupe</button>
+      <button class="ctool-btn" onclick="clearFrame()" style="color:var(--accent)">⌫ Clear</button>
+    </div>
+
+    <div id="scene-outer">
+      <div id="scene-wrap">
+        <canvas id="scene-canvas"></canvas>
+        <canvas id="onion-canvas" style="position:absolute;inset:0;pointer-events:none;opacity:0;"></canvas>
+        <div id="safe-overlay" style="display:none;position:absolute;inset:0;pointer-events:none;border:2px dashed rgba(255,255,0,.3);box-sizing:border-box;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT SIDEBAR -->
+  <div id="sidebar-right">
+    <div class="panel-header">💬 Dialogue & Caption</div>
+    <div id="dialogue-wrap">
+      <div id="active-char-badge"></div>
+      <textarea id="dialogue-text" placeholder="Type dialogue here…&#10;'Ek dum bakwaas hai yaar!'" oninput="syncDialogue()"></textarea>
+      <div class="bubble-row" id="bubble-row">
+        <button class="bub-btn sel" onclick="setBubble('speech',this)">Speech</button>
+        <button class="bub-btn" onclick="setBubble('angry',this)">💢 Angry</button>
+        <button class="bub-btn" onclick="setBubble('thought',this)">💭</button>
+        <button class="bub-btn" onclick="setBubble('shout',this)">📢</button>
+        <button class="bub-btn" onclick="setBubble('caption',this)">📺 Sub</button>
+        <button class="bub-btn" onclick="setBubble('none',this)">Off</button>
+      </div>
+      <div class="text-style-row">
+        <button class="ts-btn" id="ts-bold" onclick="toggleTextStyle('bold',this)"><b>B</b></button>
+        <button class="ts-btn" id="ts-italic" onclick="toggleTextStyle('italic',this)"><i>I</i></button>
+        <button class="ts-btn" id="ts-caps" onclick="toggleTextStyle('caps',this)">AA</button>
+        <input type="number" id="font-size-input" value="14" min="8" max="40" onchange="redraw()" title="Font size">
+        <input type="color" id="text-color" value="#111111" onchange="redraw()" style="width:24px;height:24px;border:none;border-radius:4px;cursor:pointer;padding:0;background:none;">
+      </div>
+    </div>
+
+    <div class="panel-header">🎭 Scene Characters</div>
+    <div id="scene-char-panel">
+      <div id="char-layer-list"></div>
+      <div class="layers-actions">
+        <button class="mini-btn" onclick="addCharToScene()">+ Char</button>
+        <button class="mini-btn" onclick="removeActiveChar()" style="color:var(--accent)">✕ Remove</button>
+      </div>
+    </div>
+
+    <div class="panel-header">🗂 Frame Properties</div>
+    <div id="frame-props">
+      <div id="frame-props-inner" style="padding:8px;font-size:.7rem;color:var(--text-3)">Select a frame to see properties</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- BOTTOM TIMELINE -->
+<div id="timeline-area">
+  <div id="timeline-controls">
+    <button class="tc-btn" onclick="gotoFrame(0)" title="First">⏮</button>
+    <button class="tc-btn" onclick="prevFrame()" title="Prev (←)">◀</button>
+    <button class="tc-btn" id="btn-play" onclick="togglePlay()" title="Play (Space)">▶</button>
+    <button class="tc-btn" onclick="nextFrame()" title="Next (→)">▶|</button>
+    <button class="tc-btn" onclick="gotoFrame(frames.length-1)" title="Last">⏭</button>
+    <div class="tc-sep"></div>
+    <span id="timecode">00:00:00</span>
+    <div class="tc-sep"></div>
+    <label style="font-size:.68rem;color:var(--text-3)">FPS</label>
+    <select class="fps-select" id="fps-sel" onchange="changeFPS(this.value)">
+      <option value="6">6</option>
+      <option value="8">8</option>
+      <option value="12">12</option>
+      <option value="16">16</option>
+      <option value="24" selected>24</option>
+    </select>
+    <span id="duration-label">| 0 frames · 0s</span>
+    <div class="tc-sep"></div>
+    <button class="tc-btn loop-btn" id="loop-btn" onclick="toggleLoop(this)" title="Loop">🔁</button>
+    <button class="tc-btn" onclick="duplicateFrame()" title="Dupe frame (D)">⧉</button>
+    <div class="tc-sep"></div>
+    <button id="frame-add-btn" onclick="addFrame()">＋ Add Frame (A)</button>
+  </div>
+  <div id="timeline-scroll">
+    <div id="timeline-inner">
+      <div id="tl-ruler"></div>
+      <div id="tl-tracks">
+        <div class="tl-track" id="track-main">
+          <div class="tl-track-label">🎭 Scene</div>
+          <div class="tl-track-content" id="track-main-content"></div>
+        </div>
+        <div class="tl-track" id="track-audio">
+          <div class="tl-track-label">💬 Text</div>
+          <div class="tl-track-content" id="track-text-content"></div>
+        </div>
+        <div class="tl-track" id="track-fx">
+          <div class="tl-track-label">✨ FX</div>
+          <div class="tl-track-content" id="track-fx-content"></div>
+        </div>
+      </div>
+      <div id="playhead"></div>
+    </div>
+  </div>
+</div>
+
+<!-- EXPORT MODAL -->
+<div class="modal-overlay" id="export-modal" style="display:none">
+  <div class="modal">
+    <div class="modal-head"><h3>⬇ Export Project</h3><button class="modal-close" onclick="closeModal('export-modal')">✕</button></div>
+    <div class="modal-body">
+      <div class="export-grid">
+        <div class="export-option sel" onclick="selectExport('gif',this)"><div class="eo-icon">🎞</div><div class="eo-name">Animated GIF</div><div class="eo-desc">Share on WhatsApp, Twitter</div></div>
+        <div class="export-option" onclick="selectExport('frames',this)"><div class="eo-icon">📸</div><div class="eo-name">PNG Frames</div><div class="eo-desc">Import to video editor</div></div>
+        <div class="export-option" onclick="selectExport('mp4',this)"><div class="eo-icon">🎬</div><div class="eo-name">WebM Video</div><div class="eo-desc">Best quality</div></div>
+        <div class="export-option" onclick="selectExport('project',this)"><div class="eo-icon">💾</div><div class="eo-name">Project File</div><div class="eo-desc">Save & continue later</div></div>
+      </div>
+      <div class="form-row" style="margin-top:12px">
+        <label>Resolution</label>
+        <select id="exp-res"><option value="480">480p</option><option value="720" selected>720p (1280×720)</option><option value="1080">1080p</option></select>
+      </div>
+      <div id="exp-progress" style="display:none;margin-top:10px">
+        <div style="font-size:.72rem;color:var(--text-2);margin-bottom:4px" id="exp-status">Exporting...</div>
+        <div style="width:100%;height:5px;background:var(--surface-3);border-radius:3px"><div class="pbar-fill" id="exp-bar"></div></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="topbar-btn" onclick="closeModal('export-modal')">Cancel</button>
+      <button class="topbar-btn primary" onclick="doExport()">Export Now</button>
+    </div>
+  </div>
+</div>
+
+<!-- TEMPLATES MODAL -->
+<div class="modal-overlay" id="templates-modal" style="display:none">
+  <div class="modal">
+    <div class="modal-head"><h3>📋 Quick Templates</h3><button class="modal-close" onclick="closeModal('templates-modal')">✕</button></div>
+    <div class="modal-body">
+      <div style="font-size:.72rem;color:var(--text-3);margin-bottom:10px">Load a pre-built scene sequence:</div>
+      <div style="display:flex;flex-direction:column;gap:8px" id="template-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ADD CHARACTER MODAL -->
+<div class="modal-overlay" id="addchar-modal" style="display:none">
+  <div class="modal" style="max-width:440px">
+    <div class="modal-head"><h3>🎭 Add Character to Scene</h3><button class="modal-close" onclick="closeModal('addchar-modal')">✕</button></div>
+    <div class="modal-body">
+      <div style="font-size:.72rem;color:var(--text-3);margin-bottom:10px">Choose a character to add to the current frame:</div>
+      <div class="char-grid" id="addchar-grid" style="grid-template-columns:repeat(4,1fr)"></div>
+      <div class="form-row" style="margin-top:12px">
+        <label>Start Position X</label>
+        <input type="range" id="newchar-x" min="5" max="95" value="65" style="flex:1">
+        <span style="font-family:monospace;font-size:.7rem;color:var(--cyan)" id="newchar-x-val">65</span>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="topbar-btn" onclick="closeModal('addchar-modal')">Cancel</button>
+      <button class="topbar-btn primary" onclick="confirmAddChar()">Add Character</button>
+    </div>
+  </div>
+</div>
+
+<!-- JS MODULES -->
+<script src="js/data.js"></script>
+<script src="js/draw-characters.js"></script>
+<script src="js/draw-backgrounds.js"></script>
+<script src="js/draw-effects.js"></script>
+<script src="js/draw-dialogue.js"></script>
+<script src="js/engine.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/timeline.js"></script>
+<script src="js/export.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

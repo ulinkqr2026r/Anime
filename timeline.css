@@ -1,0 +1,114 @@
+/* ═══════════════════════════════════════════
+   ANIMASTUDIO PRO — timeline.css
+   Bottom timeline strip styles
+═══════════════════════════════════════════ */
+
+#timeline-area {
+  height: 200px;
+  background: var(--surface-1);
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+#timeline-controls {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 12px; border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.tc-btn {
+  width: 28px; height: 28px; border-radius: 6px;
+  border: 1px solid var(--border); background: transparent;
+  color: var(--text-2); font-size: .85rem; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .15s;
+}
+.tc-btn:hover { border-color: var(--border-hi); color: var(--text); }
+.tc-btn.play-active { background: var(--green); border-color: var(--green); color: #000; }
+.tc-sep { width: 1px; height: 20px; background: var(--border); }
+#timecode {
+  font-family: 'JetBrains Mono', monospace; font-size: .75rem;
+  color: var(--cyan); background: rgba(0,212,255,0.08);
+  border: 1px solid rgba(0,212,255,0.15); border-radius: 5px;
+  padding: 3px 8px; min-width: 70px; text-align: center;
+}
+.fps-select {
+  background: var(--surface-2); border: 1px solid var(--border);
+  color: var(--text); font-family: 'JetBrains Mono', monospace;
+  font-size: .7rem; border-radius: 5px; padding: 3px 6px; cursor: pointer; outline: none;
+}
+#duration-label { font-size: .7rem; color: var(--text-3); }
+.loop-btn { margin-left: auto; }
+#frame-add-btn {
+  padding: 4px 12px; border-radius: 6px;
+  background: var(--accent); border: none; color: #fff;
+  font-family: 'DM Sans', sans-serif; font-size: .75rem; font-weight: 700;
+  cursor: pointer; transition: all .15s; white-space: nowrap;
+}
+#frame-add-btn:hover { background: #ff5570; }
+
+/* Timeline strip */
+#timeline-scroll {
+  flex: 1; overflow-x: auto; overflow-y: hidden; position: relative;
+}
+#timeline-scroll::-webkit-scrollbar { height: 6px; }
+#timeline-scroll::-webkit-scrollbar-track { background: transparent; }
+#timeline-scroll::-webkit-scrollbar-thumb { background: var(--surface-3); border-radius: 3px; }
+#timeline-inner {
+  position: relative; min-height: 100%; display: flex; flex-direction: column;
+}
+#tl-ruler {
+  display: flex; height: 20px; flex-shrink: 0;
+  border-bottom: 1px solid var(--border); padding-left: 80px; position: relative;
+}
+.ruler-tick {
+  display: flex; align-items: flex-end; padding-bottom: 2px;
+  font-family: 'JetBrains Mono', monospace; font-size: .55rem; color: var(--text-3);
+  border-right: 1px solid var(--border); padding-right: 3px; flex-shrink: 0;
+}
+#tl-tracks { flex: 1; display: flex; flex-direction: column; }
+.tl-track {
+  display: flex; align-items: stretch;
+  border-bottom: 1px solid var(--border); height: 48px;
+}
+.tl-track-label {
+  width: 80px; flex-shrink: 0; padding: 0 8px;
+  display: flex; align-items: center;
+  font-size: .6rem; font-weight: 700; color: var(--text-3);
+  border-right: 1px solid var(--border); letter-spacing: .5px;
+}
+.tl-track-content {
+  flex: 1; position: relative; overflow: visible; min-height: 46px;
+}
+.frame-cell {
+  position: absolute; top: 4px; height: 36px;
+  border-radius: 5px; border: 1.5px solid rgba(255,255,255,0.12);
+  cursor: pointer; overflow: hidden; transition: border-color .1s;
+}
+.frame-cell:hover { border-color: rgba(255,255,255,0.3); }
+.frame-cell.sel { border-color: var(--cyan) !important; box-shadow: 0 0 0 1px var(--cyan); }
+.frame-cell.playing { border-color: var(--green) !important; }
+.fcnum {
+  position: absolute; top: 2px; left: 3px;
+  font-family: 'JetBrains Mono', monospace; font-size: .5rem; color: rgba(255,255,255,0.7);
+  font-weight: 700; pointer-events: none; text-shadow: 0 1px 2px #000;
+}
+.fcdel {
+  position: absolute; top: 2px; right: 2px;
+  width: 14px; height: 14px; border-radius: 3px;
+  background: rgba(255,60,90,0); border: none; color: rgba(255,255,255,0);
+  font-size: .6rem; cursor: pointer; transition: all .15s;
+  display: flex; align-items: center; justify-content: center;
+}
+.frame-cell:hover .fcdel { background: rgba(255,60,90,0.8); color: #fff; }
+
+#playhead {
+  position: absolute; left: 80px; top: 0; bottom: 0; width: 2px;
+  background: var(--accent); pointer-events: none; z-index: 10;
+  transition: left .05s linear;
+}
+#playhead::before {
+  content:''; position: absolute; top: 0; left: -4px;
+  width: 10px; height: 10px; background: var(--accent); border-radius: 0 0 3px 3px;
+  clip-path: polygon(50% 100%, 0 0, 100% 0);
+}
